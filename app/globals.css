@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap");
+
 :root {
   color-scheme: light;
   --bg: #f6f7f9;
@@ -192,6 +194,229 @@ audio {
   width: 100%;
 }
 
+.login-shell {
+  min-height: 100vh;
+  background: #fbfaf8;
+  color: #1a1a18;
+  display: flex;
+  flex-direction: column;
+  font-family: "DM Sans", Arial, Helvetica, sans-serif;
+}
+
+.login-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 28px 40px;
+}
+
+.login-lockup {
+  color: #1a1a18;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: "Sora", Arial, Helvetica, sans-serif;
+  text-decoration: none;
+}
+
+.login-mark {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.login-divider {
+  width: 1px;
+  height: 16px;
+  background: #d8d4cb;
+}
+
+.login-name {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.login-backlink {
+  color: #6e6c66;
+  font-size: 13.5px;
+  text-decoration: none;
+  transition: color 160ms ease;
+}
+
+.login-backlink:hover {
+  color: #1a1a18;
+}
+
+.login-stage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 24px 80px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 408px;
+  background: #ffffff;
+  border: 1px solid #e7e4dd;
+  border-radius: 16px;
+  padding: 44px 40px 32px;
+  box-shadow: 0 1px 2px rgba(26, 26, 24, 0.03), 0 12px 40px -16px rgba(26, 26, 24, 0.1);
+  animation: login-rise 460ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes login-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.login-eyebrow {
+  color: #98958d;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  line-height: 1;
+  margin: 0 0 18px;
+  padding: 0;
+  text-transform: uppercase;
+}
+
+.login-card h1 {
+  color: #1a1a18;
+  font-family: "Sora", Arial, Helvetica, sans-serif;
+  font-size: 25px;
+  font-weight: 600;
+  line-height: 1.15;
+  margin: 0 0 12px;
+}
+
+.login-lede {
+  color: #6e6c66;
+  font-size: 14.5px;
+  line-height: 1.55;
+  margin: 0 0 30px;
+  padding: 0;
+}
+
+.login-alert {
+  background: rgba(178, 59, 46, 0.08);
+  border: 1px solid rgba(178, 59, 46, 0.22);
+  border-radius: 10px;
+  color: #8f2f25;
+  font-size: 13px;
+  line-height: 1.45;
+  margin: -10px 0 18px;
+  padding: 11px 13px;
+}
+
+.login-google-button {
+  width: 100%;
+  min-height: 50px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: #ffffff;
+  border: 1px solid #d8d4cb;
+  border-radius: 10px;
+  color: #1a1a18;
+  cursor: pointer;
+  font-family: "DM Sans", Arial, Helvetica, sans-serif;
+  font-size: 14.5px;
+  font-weight: 600;
+  padding: 0 16px;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 120ms ease, background 160ms ease;
+}
+
+.login-google-button:hover {
+  border-color: #bfbaaf;
+  box-shadow: 0 2px 10px -4px rgba(26, 26, 24, 0.18);
+}
+
+.login-google-button:active {
+  transform: translateY(1px);
+}
+
+.login-google-button:disabled {
+  cursor: default;
+  opacity: 0.66;
+}
+
+.login-google-icon,
+.login-spinner {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+.login-spinner {
+  border: 2px solid #d8d4cb;
+  border-radius: 50%;
+  border-top-color: #1a1a18;
+  animation: login-spin 700ms linear infinite;
+}
+
+@keyframes login-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.login-hint {
+  margin-top: 18px;
+  color: #98958d;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.login-hint svg {
+  flex: none;
+  margin-top: 1px;
+}
+
+.login-domain {
+  color: #7a6a57;
+  font-weight: 600;
+}
+
+.login-contact {
+  margin: 28px 0 0;
+  padding-top: 20px;
+  border-top: 1px solid #e7e4dd;
+  color: #98958d;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.login-contact a {
+  color: #6e6c66;
+  border-bottom: 1px solid #d8d4cb;
+  text-decoration: none;
+}
+
+.login-contact a:hover {
+  color: #1a1a18;
+}
+
+.login-footer {
+  color: #98958d;
+  font-size: 11.5px;
+  line-height: 1.6;
+  padding: 0 24px 36px;
+  text-align: center;
+}
+
 .helperbar {
   display: flex;
   gap: 8px;
@@ -215,5 +440,28 @@ audio {
   table {
     display: block;
     overflow-x: auto;
+  }
+
+  .login-topbar {
+    padding: 22px;
+  }
+
+  .login-stage {
+    padding: 18px 18px 56px;
+  }
+
+  .login-card {
+    padding: 38px 26px 28px;
+  }
+}
+
+@media (max-width: 420px) {
+  .login-topbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .login-card h1 {
+    font-size: 24px;
   }
 }
