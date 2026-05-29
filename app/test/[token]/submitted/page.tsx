@@ -1,16 +1,11 @@
-import { notFound } from "next/navigation";
-import { getCandidateByToken } from "@/lib/db";
-
-export default async function SubmittedPage({ params }: { params: Promise<{ token: string }> }) {
-  const { token } = await params;
-  const candidate = await getCandidateByToken(token);
-  if (!candidate) notFound();
-
+export default function SubmittedPage() {
   return (
     <main className="shell">
       <section className="panel stack">
-        <h1>Submission received</h1>
-        <p>Thank you, {candidate.name}. Your transcription test has been submitted.</p>
+        <p>
+          Thank you — your test has been submitted. We will review both parts and contact you with the next step if your result matches our quality
+          requirements.
+        </p>
       </section>
     </main>
   );

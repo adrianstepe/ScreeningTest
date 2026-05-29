@@ -33,6 +33,7 @@ export function TestForm({ token, name, partADraft, partBDraft }: Props) {
   const [partA, setPartA] = useState(partADraft || "");
   const [partB, setPartB] = useState(partBDraft || "");
   const [dirty, setDirty] = useState(false);
+  const [confirmedInstructions, setConfirmedInstructions] = useState(false);
   const [savedAt, setSavedAt] = useState<string>();
   const [isPending, startTransition] = useTransition();
   const partARef = useRef<HTMLTextAreaElement>(null);
@@ -80,22 +81,43 @@ export function TestForm({ token, name, partADraft, partBDraft }: Props) {
       <input type="hidden" name="token" value={token} />
       <section className="panel stack">
         <h1>Transkripcijas tests: {name}</h1>
-        <div className="grid">
-          <div>
-            <h2>Instrukcijas</h2>
-            <ul>
-              <li>Part A: transcribe the Latvian speech accurately.</li>
-              <li>Part B: transcribe only the Latvian interpreter/speaker voices.</li>
-              <li>For Part B, label speakers as [S1]:, [S2]: etc.</li>
-              <li>Same voice must keep the same label throughout.</li>
-              <li>Ignore distant English/background speech unless it makes the Latvian unclear.</li>
-              <li>If speech cannot be understood, write [inaudible].</li>
-              <li>If there is a likely but uncertain word, write [unclear: vārds?].</li>
-              <li>Use full Latvian diacritics.</li>
-              <li>Do not submit raw AI/Whisper output without checking.</li>
-              <li>No personal notes in the transcript.</li>
-            </ul>
+        <details className="instructions stack" open>
+          <summary>Instructions before starting</summary>
+          <div className="grid">
+            <div>
+              <h2>General rules</h2>
+              <ul>
+                <li>The visible transcript is a Whisper draft, not the correct answer.</li>
+                <li>Listen to the audio and correct the draft as accurately as possible.</li>
+                <li>Write what is actually said, not what the speaker probably meant. Do not paraphrase or shorten the text.</li>
+                <li>Keep full Latvian diacritics: ā, č, ē, ģ, ī, ķ, ļ, ņ, š, ū, ž.</li>
+                <li>Keep audible fillers and hesitations when they are part of the speech, such as “ē”, “ēē”, “ā”, “emm”, “mmm”, “nu”, “tātad”.</li>
+                <li>Keep false starts and self-corrections, for example “Mēs ej- mēs iesim...”.</li>
+                <li>Keep repetitions, for example “es es es domāju...”.</li>
+                <li>If something cannot be understood, write [inaudible].</li>
+                <li>If you have a likely guess but are not sure, write [unclear: word?].</li>
+              </ul>
+            </div>
+            <div>
+              <h2>Part A</h2>
+              <ul>
+                <li>Part A is normal transcription correction.</li>
+                <li>If Part A has one speaker, speaker labels are not required.</li>
+              </ul>
+
+              <h2>Part B</h2>
+              <ul>
+                <li>Part B requires speaker labels.</li>
+                <li>Use the format [S1]: Text..., [S2]: Text..., [S1]: Text...</li>
+                <li>The same speaker must keep the same label throughout the file.</li>
+                <li>Start a new line each time the speaker changes.</li>
+                <li>For overlap, use [overlap] ... [/overlap] where possible.</li>
+                <li>Do not merge two speakers into one line.</li>
+              </ul>
+            </div>
           </div>
+        </details>
+        <div className="grid">
           <div>
             <h2>Privacy</h2>
             <p>
@@ -158,9 +180,22 @@ export function TestForm({ token, name, partADraft, partBDraft }: Props) {
         />
       </section>
 
+      <section className="panel stack">
+        <label className="checkbox-label">
+          <input
+            type="checkbox"
+            name="instructionConfirmation"
+            checked={confirmedInstructions}
+            onChange={(event) => setConfirmedInstructions(event.target.checked)}
+            required
+          />
+          <span>I confirm that I listened to the audio and corrected the Whisper draft according to the instructions.</span>
+        </label>
+      </section>
+
       <div className="spread">
         <span className="muted small">{savedAt ? `Draft saved ${savedAt}` : "Draft saves automatically while you type."}</span>
-        <button className="button primary" type="submit" disabled={isPending || !partA.trim() || !partB.trim()}>
+        <button className="button primary" type="submit" disabled={isPending || !partA.trim() || !partB.trim() || !confirmedInstructions}>
           {isPending ? "Submitting..." : "Submit test"}
         </button>
       </div>

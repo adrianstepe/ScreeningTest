@@ -38,11 +38,25 @@ export type DiarizationScore = PartScore & {
   candidateTurnCount: number;
 };
 
+export type ScoreImprovement = {
+  werPercentagePoints: number;
+  cerPercentagePoints: number;
+  draftSimilarity: number;
+};
+
 export type Scores = {
   partA?: PartScore;
   partB?: DiarizationScore;
+  whisperBaseline?: {
+    partA?: PartScore;
+    partB?: PartScore;
+  };
+  improvement?: {
+    partA?: ScoreImprovement;
+    partB?: ScoreImprovement;
+  };
   summary?: {
-    overall: "Pass" | "Borderline" | "Fail";
+    overall: "Auto Pass" | "Manual Review" | "Auto Fail";
     averageWer: number;
     issues: string[];
   };
@@ -69,6 +83,8 @@ export type Candidate = {
   partBAudioFileId?: string;
   partAKey: string;
   partBKey: string;
+  partAWhisperDraft?: string;
+  partBWhisperDraft?: string;
   partADraft?: string;
   partBDraft?: string;
   partASubmission?: string;

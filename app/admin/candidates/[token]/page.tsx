@@ -19,6 +19,14 @@ function scoreLine(label: string, value?: number) {
   );
 }
 
+function improvementLine(label: string, value?: number) {
+  return (
+    <div>
+      <strong>{label}:</strong> {value === undefined ? "-" : `${value} percentage points`}
+    </div>
+  );
+}
+
 function emailTemplate(name: string, link: string) {
   return `Subject: Stepe Digital transkripcijas tests
 
@@ -115,9 +123,9 @@ export default async function CandidateAdminPage({ params }: { params: Promise<{
           )}
           {candidate.scores.summary ? (
             <div>
-              <h3>Overall auto summary</h3>
+              <h3>Final suggested status</h3>
               <div>
-                <strong>{candidate.scores.summary.overall}</strong> - {candidate.scores.summary.averageWer}% average WER
+                <strong>{candidate.scores.summary.overall}</strong> - {candidate.scores.summary.averageWer}% average WER shown for context only
               </div>
               {candidate.scores.summary.issues.length ? <div className="danger">{candidate.scores.summary.issues.join(", ")}</div> : <div className="muted">No automatic scoring issues.</div>}
             </div>
@@ -129,6 +137,11 @@ export default async function CandidateAdminPage({ params }: { params: Promise<{
               <h3>Part A</h3>
               {scoreLine("WER", candidate.scores.partA?.wer)}
               {scoreLine("CER", candidate.scores.partA?.cer)}
+              {scoreLine("Whisper baseline WER", candidate.scores.whisperBaseline?.partA?.wer)}
+              {scoreLine("Whisper baseline CER", candidate.scores.whisperBaseline?.partA?.cer)}
+              {improvementLine("WER improvement", candidate.scores.improvement?.partA?.werPercentagePoints)}
+              {improvementLine("CER improvement", candidate.scores.improvement?.partA?.cerPercentagePoints)}
+              {scoreLine("Similarity to Whisper draft", candidate.scores.improvement?.partA?.draftSimilarity)}
               <div>Sub / Del / Ins: {candidate.scores.partA ? `${candidate.scores.partA.substitutions} / ${candidate.scores.partA.deletions} / ${candidate.scores.partA.insertions}` : "-"}</div>
               <div className="danger">{candidate.scores.partA?.redFlags.join(", ")}</div>
             </div>
@@ -136,6 +149,11 @@ export default async function CandidateAdminPage({ params }: { params: Promise<{
               <h3>Part B</h3>
               {scoreLine("WER", candidate.scores.partB?.wer)}
               {scoreLine("CER", candidate.scores.partB?.cer)}
+              {scoreLine("Whisper baseline WER", candidate.scores.whisperBaseline?.partB?.wer)}
+              {scoreLine("Whisper baseline CER", candidate.scores.whisperBaseline?.partB?.cer)}
+              {improvementLine("WER improvement", candidate.scores.improvement?.partB?.werPercentagePoints)}
+              {improvementLine("CER improvement", candidate.scores.improvement?.partB?.cerPercentagePoints)}
+              {scoreLine("Similarity to Whisper draft", candidate.scores.improvement?.partB?.draftSimilarity)}
               {scoreLine("Speaker sequence accuracy", candidate.scores.partB?.speakerSequenceAccuracy)}
               <div>
                 Speakers ref/candidate:{" "}
@@ -160,8 +178,16 @@ export default async function CandidateAdminPage({ params }: { params: Promise<{
               <textarea readOnly value={candidate.partASubmission || candidate.partADraft || ""} />
             </label>
             <label>
+              Part A Whisper baseline
+              <textarea readOnly value={candidate.partAWhisperDraft || ""} />
+            </label>
+            <label>
               Part B transcript
               <textarea readOnly value={candidate.partBSubmission || candidate.partBDraft || ""} />
+            </label>
+            <label>
+              Part B Whisper baseline
+              <textarea readOnly value={candidate.partBWhisperDraft || ""} />
             </label>
           </div>
 
@@ -169,9 +195,12 @@ export default async function CandidateAdminPage({ params }: { params: Promise<{
             <h2>Manual Review</h2>
             <input type="hidden" name="token" value={candidate.token} />
             <label>
-              Formatting score /10
+              Manual formatting/diarization score /10
               <input name="formattingScore" type="number" min="0" max="10" step="1" defaultValue={candidate.formattingScore ?? ""} />
             </label>
+            <p className="muted small">
+              Covers speaker labels, turn breaks, overlap tags, merged speakers, dropped turns, and general style-guide compliance.
+            </p>
             <label>
               Decision
               <select name="decision" defaultValue={candidate.decision}>

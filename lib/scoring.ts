@@ -72,6 +72,14 @@ function rate(distance: number, refLength: number) {
   return refLength ? (distance / refLength) * 100 : 0;
 }
 
+export function transcriptSimilarity(a: string, b: string, options: ScoreOptions = {}) {
+  const aWords = normalize(a, options.stripTags).split(" ").filter(Boolean);
+  const bWords = normalize(b, options.stripTags).split(" ").filter(Boolean);
+  if (!aWords.length && !bWords.length) return 100;
+  const edits = editCounts(aWords, bWords);
+  return Number((Math.max(0, 1 - edits.distance / Math.max(aWords.length, bWords.length)) * 100).toFixed(2));
+}
+
 function strippedDiacritics(reference: string, candidate: string) {
   const refCount = [...reference].filter((char) => latvianDiacritics.has(char)).length;
   const candidateCount = [...candidate].filter((char) => latvianDiacritics.has(char)).length;

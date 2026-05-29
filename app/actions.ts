@@ -69,6 +69,8 @@ export async function createCandidate(_: CreateCandidateState, formData: FormDat
       partBAudioFileId,
       partAKey,
       partBKey,
+      partAWhisperDraft: partADraft,
+      partBWhisperDraft: partBDraft,
       partADraft,
       partBDraft,
       scores: { selfCheck: selfCheck(partAKey, partBKey) },
@@ -94,6 +96,7 @@ export async function submitCandidate(formData: FormData) {
   const candidate = await getCandidateByToken(token);
   if (!candidate) throw new Error("Invalid test link");
 
+  if (formData.get("instructionConfirmation") !== "on") throw new Error("Instruction confirmation is required");
   const partASubmission = requiredString(formData, "partA");
   const partBSubmission = requiredString(formData, "partB");
   await recordCandidateSubmission(candidate.token, partASubmission, partBSubmission);

@@ -9,6 +9,14 @@ function fmt(value?: string) {
   return value ? new Date(value).toLocaleString("lv-LV") : "-";
 }
 
+function pct(value?: number) {
+  return value === undefined ? "-" : `${value}%`;
+}
+
+function pp(value?: number) {
+  return value === undefined ? "-" : `${value} pp`;
+}
+
 export default async function AdminDashboard() {
   await requireAdmin();
   const candidates = await listCandidates();
@@ -33,11 +41,14 @@ export default async function AdminDashboard() {
               <th>Email</th>
               <th>Status</th>
               <th>Created / Opened / Submitted</th>
-              <th>Part A WER</th>
-              <th>Part B WER</th>
+              <th>Part A WER/CER</th>
+              <th>Part A baseline / improvement</th>
+              <th>Part B WER/CER</th>
+              <th>Part B baseline / improvement</th>
               <th>Speaker accuracy</th>
-              <th>Auto summary</th>
+              <th>Suggested status</th>
               <th>Formatting</th>
+              <th>Red flags</th>
               <th>Decision</th>
               <th>Notes</th>
               <th>Actions</th>
@@ -58,21 +69,40 @@ export default async function AdminDashboard() {
                   <br />
                   {fmt(candidate.submittedAt)}
                 </td>
-                <td>{candidate.scores.partA ? `${candidate.scores.partA.wer}%` : "-"}</td>
-                <td>{candidate.scores.partB ? `${candidate.scores.partB.wer}%` : "-"}</td>
-                <td>{candidate.scores.partB ? `${candidate.scores.partB.speakerSequenceAccuracy}%` : "-"}</td>
+                <td>
+                  {pct(candidate.scores.partA?.wer)}
+                  <br />
+                  <span className="small">{pct(candidate.scores.partA?.cer)} CER</span>
+                </td>
+                <td>
+                  {pct(candidate.scores.whisperBaseline?.partA?.wer)}
+                  <br />
+                  <span className="small">{pp(candidate.scores.improvement?.partA?.werPercentagePoints)}</span>
+                </td>
+                <td>
+                  {pct(candidate.scores.partB?.wer)}
+                  <br />
+                  <span className="small">{pct(candidate.scores.partB?.cer)} CER</span>
+                </td>
+                <td>
+                  {pct(candidate.scores.whisperBaseline?.partB?.wer)}
+                  <br />
+                  <span className="small">{pp(candidate.scores.improvement?.partB?.werPercentagePoints)}</span>
+                </td>
+                <td>{pct(candidate.scores.partB?.speakerSequenceAccuracy)}</td>
                 <td>
                   {candidate.scores.summary ? (
                     <>
                       <span className="badge">{candidate.scores.summary.overall}</span>
                       <br />
-                      <span className="small">{candidate.scores.summary.averageWer}% avg WER</span>
+                      <span className="small">{candidate.scores.summary.averageWer}% avg WER context</span>
                     </>
                   ) : (
                     "-"
                   )}
                 </td>
                 <td>{candidate.formattingScore ?? "-"}</td>
+                <td className="small">{[...(candidate.scores.partA?.redFlags || []), ...(candidate.scores.partB?.redFlags || [])].join(", ") || candidate.redFlags || "-"}</td>
                 <td>{candidate.decision || "-"}</td>
                 <td className="small">{candidate.notes || "-"}</td>
                 <td className="stack">
@@ -85,7 +115,7 @@ export default async function AdminDashboard() {
             ))}
             {!candidates.length && (
               <tr>
-                <td colSpan={12} className="muted">
+                <td colSpan={15} className="muted">
                   No candidates yet.
                 </td>
               </tr>

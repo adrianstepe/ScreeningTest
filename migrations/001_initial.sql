@@ -22,6 +22,8 @@ create table if not exists candidates (
   part_b_audio_file_id text references uploaded_files(id),
   part_a_key text not null,
   part_b_key text not null,
+  part_a_whisper_draft text,
+  part_b_whisper_draft text,
   part_a_draft text,
   part_b_draft text,
   part_a_submission text,

@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { Pool } from "pg";
 
@@ -12,10 +12,15 @@ if (!databaseUrl || !/^postgres(ql)?:\/\//i.test(databaseUrl)) {
 const pool = new Pool({ connectionString: databaseUrl });
 
 async function main() {
-  const sql = await readFile(path.join(process.cwd(), "migrations", "001_initial.sql"), "utf8");
+  const migrationsDir = path.join(process.cwd(), "migrations");
+  const files = (await readdir(migrationsDir)).filter((file) => file.endsWith(".sql")).sort();
 
   try {
-    await pool.query(sql);
+    for (const file of files) {
+      const sql = await readFile(path.join(migrationsDir, file), "utf8");
+      await pool.query(sql);
+      console.log(`Applied ${file}.`);
+    }
     console.log("Database migration completed.");
   } finally {
     await pool.end();

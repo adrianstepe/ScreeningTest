@@ -50,6 +50,8 @@ function rowToCandidate(row: Record<string, unknown>): Candidate {
     partBAudioFileId: (row.part_b_audio_file_id as string | null) || undefined,
     partAKey: String(row.part_a_key || ""),
     partBKey: String(row.part_b_key || ""),
+    partAWhisperDraft: (row.part_a_whisper_draft as string | null) || undefined,
+    partBWhisperDraft: (row.part_b_whisper_draft as string | null) || undefined,
     partADraft: (row.part_a_draft as string | null) || undefined,
     partBDraft: (row.part_b_draft as string | null) || undefined,
     partASubmission: (row.part_a_submission as string | null) || undefined,
@@ -90,25 +92,40 @@ export async function getCandidateByToken(token: string) {
   return (await readJson()).candidates.find((candidate) => candidate.token === token);
 }
 
+export async function getCandidateSubmissionStateByToken(token: string) {
+  if (usePostgres) {
+    const result = await pg().query("select submitted_at from candidates where token = $1 limit 1", [token]);
+    if (!result.rows[0]) return undefined;
+    return { submittedAt: (result.rows[0].submitted_at as string | null) || undefined };
+  }
+
+  const candidate = (await readJson()).candidates.find((item) => item.token === token);
+  if (!candidate) return undefined;
+  return { submittedAt: candidate.submittedAt };
+}
+
 export async function saveCandidate(candidate: Candidate) {
   if (usePostgres) {
     await pg().query(
       `insert into candidates (
         id, token, name, email, status, deadline_at, created_at, opened_at, submitted_at, reviewed_at,
-        part_a_audio_file_id, part_b_audio_file_id, part_a_key, part_b_key, part_a_draft, part_b_draft,
-        part_a_submission, part_b_submission, scores, formatting_score, decision, tier, notes, red_flags
+        part_a_audio_file_id, part_b_audio_file_id, part_a_key, part_b_key, part_a_whisper_draft,
+        part_b_whisper_draft, part_a_draft, part_b_draft, part_a_submission, part_b_submission, scores,
+        formatting_score, decision, tier, notes, red_flags
       ) values (
-        $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24
+        $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26
       )
       on conflict (id) do update set
         token = excluded.token, name = excluded.name, email = excluded.email, status = excluded.status,
         deadline_at = excluded.deadline_at, opened_at = excluded.opened_at, submitted_at = excluded.submitted_at,
         reviewed_at = excluded.reviewed_at, part_a_audio_file_id = excluded.part_a_audio_file_id,
         part_b_audio_file_id = excluded.part_b_audio_file_id, part_a_key = excluded.part_a_key,
-        part_b_key = excluded.part_b_key, part_a_draft = excluded.part_a_draft, part_b_draft = excluded.part_b_draft,
-        part_a_submission = excluded.part_a_submission, part_b_submission = excluded.part_b_submission,
-        scores = excluded.scores, formatting_score = excluded.formatting_score, decision = excluded.decision,
-        tier = excluded.tier, notes = excluded.notes, red_flags = excluded.red_flags`,
+        part_b_key = excluded.part_b_key, part_a_whisper_draft = excluded.part_a_whisper_draft,
+        part_b_whisper_draft = excluded.part_b_whisper_draft, part_a_draft = excluded.part_a_draft,
+        part_b_draft = excluded.part_b_draft, part_a_submission = excluded.part_a_submission,
+        part_b_submission = excluded.part_b_submission, scores = excluded.scores,
+        formatting_score = excluded.formatting_score, decision = excluded.decision, tier = excluded.tier,
+        notes = excluded.notes, red_flags = excluded.red_flags`,
       [
         candidate.id,
         candidate.token,
@@ -124,6 +141,8 @@ export async function saveCandidate(candidate: Candidate) {
         candidate.partBAudioFileId || null,
         candidate.partAKey,
         candidate.partBKey,
+        candidate.partAWhisperDraft || null,
+        candidate.partBWhisperDraft || null,
         candidate.partADraft || null,
         candidate.partBDraft || null,
         candidate.partASubmission || null,

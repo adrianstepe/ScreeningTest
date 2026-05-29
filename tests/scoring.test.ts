@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { scoreDiarization, scoreTranscript, selfCheck } from "@/lib/scoring";
+import { scoreDiarization, scoreTranscript, selfCheck, transcriptSimilarity } from "@/lib/scoring";
 
 const partA = "Šis ir īss latviešu transkripcijas tests ar garumzīmēm.";
 const partB = `[S1]: Labdien, šis ir pirmais runātājs.
@@ -25,5 +25,8 @@ const check = selfCheck(partA, partB);
 assert.equal(check.partAOk, true);
 assert.equal(check.partBTextOk, true);
 assert.equal(check.partBSpeakersOk, true);
+
+assert.equal(transcriptSimilarity("same transcript", "same transcript"), 100);
+assert.ok(transcriptSimilarity("same transcript", "different words") < 50);
 
 console.log("Scoring tests passed.");
