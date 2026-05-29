@@ -210,52 +210,61 @@ audio {
 
 .audio-tools {
   display: grid;
-  gap: 10px;
+  gap: 6px;
 }
 
 .speed-control {
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: #f9fafb;
-  display: grid;
-  gap: 8px;
-  padding: 12px;
-}
-
-.speed-header {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 100%;
 }
 
-.speed-header label {
-  display: block;
+.speed-label {
+  color: var(--muted);
   font-size: 13px;
+  font-weight: 600;
 }
 
-.speed-header output {
-  min-width: 48px;
+.speed-options {
+  display: inline-flex;
+  align-items: center;
   border: 1px solid var(--line);
   border-radius: 6px;
+  overflow: hidden;
+}
+
+.speed-button {
+  min-width: 44px;
+  min-height: 30px;
+  border: 0;
+  border-right: 1px solid var(--line);
   background: #fff;
-  font-size: 13px;
-  font-weight: 700;
-  padding: 4px 8px;
-  text-align: center;
-}
-
-.speed-slider {
-  display: grid;
-  grid-template-columns: auto minmax(140px, 1fr) auto;
-  align-items: center;
-  gap: 10px;
   color: var(--muted);
-  font-size: 12px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 5px 9px;
 }
 
-.speed-slider input {
-  padding: 0;
+.speed-button:last-child {
+  border-right: 0;
+}
+
+.speed-button:hover {
+  background: #f9fafb;
+  color: var(--ink);
+}
+
+.speed-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.speed-button.selected {
+  background: var(--accent);
+  color: #fff;
 }
 
 .instructions summary {
