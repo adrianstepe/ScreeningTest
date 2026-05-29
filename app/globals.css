@@ -116,6 +116,14 @@ select {
   color: var(--danger);
 }
 
+.danger-panel {
+  border: 1px solid #fecdca;
+  background: #fff5f5;
+  color: var(--danger);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
 .button {
   display: inline-flex;
   min-height: 38px;

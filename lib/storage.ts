@@ -4,6 +4,7 @@ import path from "node:path";
 import { Readable } from "node:stream";
 import { randomUUID } from "node:crypto";
 import type { UploadedFile } from "@/lib/types";
+import { defaultAudioPath } from "@/lib/screeningMaterials";
 
 const allowedTypes = new Set(["audio/mpeg", "audio/mp3", "audio/wav", "audio/x-wav", "audio/mp4", "audio/aac", "audio/ogg", "audio/webm"]);
 const maxBytes = 100 * 1024 * 1024;
@@ -75,6 +76,9 @@ export async function storeAudioBytes(originalName: string, mimeType: string, by
 }
 
 export async function readAudio(file: UploadedFile) {
+  const builtInPath = defaultAudioPath(file.storageKey);
+  if (builtInPath) return readFile(builtInPath);
+
   if (storageProvider() === "s3") {
     const bucket = process.env.STORAGE_BUCKET;
     if (!bucket) throw new Error("STORAGE_BUCKET is required for S3 storage");

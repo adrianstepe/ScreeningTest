@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { Pool } from "pg";
 import type { AppDatabase, Candidate, UploadedFile } from "@/lib/types";
+import { defaultAudioFileById } from "@/lib/screeningMaterials";
 
 const dataDir = path.join(process.cwd(), "data");
 const jsonPath = path.join(dataDir, "db.json");
@@ -173,6 +174,9 @@ export async function saveFile(file: UploadedFile) {
 
 export async function getFile(id?: string) {
   if (!id) return undefined;
+  const defaultAudioFile = defaultAudioFileById(id);
+  if (defaultAudioFile) return defaultAudioFile;
+
   if (usePostgres) {
     const result = await pg().query("select * from uploaded_files where id = $1 limit 1", [id]);
     return result.rows[0] ? rowToFile(result.rows[0]) : undefined;

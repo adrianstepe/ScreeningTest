@@ -1,17 +1,19 @@
 "use server";
 
 import { randomBytes, randomUUID } from "node:crypto";
-import { readFile } from "node:fs/promises";
-import path from "node:path";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { deleteCandidate, getCandidateByToken, saveCandidate, saveFile } from "@/lib/db";
 import { selfCheck } from "@/lib/scoring";
-import { screeningMaterialPaths } from "@/lib/screeningMaterials";
-import { storeAudio, storeAudioBytes } from "@/lib/storage";
+import { defaultAudioFiles } from "@/lib/screeningMaterials";
+import { storeAudio } from "@/lib/storage";
 import { calculateCandidateScores, recordCandidateSubmission } from "@/lib/workflows";
 import type { Candidate, CandidateStatus, Decision, Tier } from "@/lib/types";
+
+export type CreateCandidateState = {
+  error?: string;
+} | null;
 
 async function textFromFormValue(value: FormDataEntryValue | null) {
   if (value instanceof File && value.size > 0) return value.text();
@@ -32,49 +34,59 @@ async function uploadAudio(formData: FormData, key: string) {
   return stored.id;
 }
 
-async function uploadAudioOrDefault(formData: FormData, key: string, defaultPath: string, mimeType: string) {
+async function uploadAudioOrDefault(formData: FormData, key: string, defaultFileId: "partA" | "partB") {
   const uploaded = await uploadAudio(formData, key);
   if (uploaded) return uploaded;
 
-  const bytes = await readFile(defaultPath);
-  const stored = await storeAudioBytes(path.basename(defaultPath), mimeType, bytes);
-  await saveFile(stored);
-  return stored.id;
+  const defaultFile = defaultAudioFiles[defaultFileId];
+  await saveFile(defaultFile);
+  return defaultFile.id;
 }
 
-export async function createCandidate(formData: FormData) {
+export async function createCandidate(_: CreateCandidateState, formData: FormData): Promise<CreateCandidateState> {
   await requireAdmin();
-  const partAKey = (await textFromFormValue(formData.get("partAKeyFile"))) || requiredString(formData, "partAKey");
-  const partBKey = (await textFromFormValue(formData.get("partBKeyFile"))) || requiredString(formData, "partBKey");
-  const partADraft = (await textFromFormValue(formData.get("partADraftFile"))) || ((formData.get("partADraft") as string | null)?.trim() || undefined);
-  const partBDraft = (await textFromFormValue(formData.get("partBDraftFile"))) || ((formData.get("partBDraft") as string | null)?.trim() || undefined);
-  const partAAudioFileId = await uploadAudioOrDefault(formData, "partAAudio", screeningMaterialPaths.partAAudio, "audio/mpeg");
-  const partBAudioFileId = await uploadAudioOrDefault(formData, "partBAudio", screeningMaterialPaths.partBAudio, "audio/wav");
-  if (!partAAudioFileId || !partBAudioFileId) throw new Error("Both audio files are required");
+  let token = "";
 
-  const now = new Date().toISOString();
-  const candidate: Candidate = {
-    id: randomUUID(),
-    token: randomBytes(32).toString("hex"),
-    name: requiredString(formData, "name"),
-    email: requiredString(formData, "email"),
-    status: "Created",
-    deadlineAt: (formData.get("deadlineAt") as string | null) || undefined,
-    createdAt: now,
-    partAAudioFileId,
-    partBAudioFileId,
-    partAKey,
-    partBKey,
-    partADraft,
-    partBDraft,
-    scores: { selfCheck: selfCheck(partAKey, partBKey) },
-    decision: "",
-    tier: ""
-  };
+  try {
+    const partAKey = (await textFromFormValue(formData.get("partAKeyFile"))) || requiredString(formData, "partAKey");
+    const partBKey = (await textFromFormValue(formData.get("partBKeyFile"))) || requiredString(formData, "partBKey");
+    const partADraft = (await textFromFormValue(formData.get("partADraftFile"))) || ((formData.get("partADraft") as string | null)?.trim() || undefined);
+    const partBDraft = (await textFromFormValue(formData.get("partBDraftFile"))) || ((formData.get("partBDraft") as string | null)?.trim() || undefined);
+    const partAAudioFileId = await uploadAudioOrDefault(formData, "partAAudio", "partA");
+    const partBAudioFileId = await uploadAudioOrDefault(formData, "partBAudio", "partB");
+    if (!partAAudioFileId || !partBAudioFileId) throw new Error("Both audio files are required");
 
-  await saveCandidate(candidate);
+    const now = new Date().toISOString();
+    const candidate: Candidate = {
+      id: randomUUID(),
+      token: randomBytes(32).toString("hex"),
+      name: requiredString(formData, "name"),
+      email: requiredString(formData, "email"),
+      status: "Created",
+      deadlineAt: (formData.get("deadlineAt") as string | null) || undefined,
+      createdAt: now,
+      partAAudioFileId,
+      partBAudioFileId,
+      partAKey,
+      partBKey,
+      partADraft,
+      partBDraft,
+      scores: { selfCheck: selfCheck(partAKey, partBKey) },
+      decision: "",
+      tier: ""
+    };
+
+    await saveCandidate(candidate);
+    token = candidate.token;
+  } catch (error) {
+    console.error("createCandidate failed", error);
+    return {
+      error: error instanceof Error ? error.message : "Could not create the candidate link. Check server configuration and try again."
+    };
+  }
+
   revalidatePath("/admin");
-  redirect(`/admin/candidates/${candidate.token}`);
+  redirect(`/admin/candidates/${token}`);
 }
 
 export async function submitCandidate(formData: FormData) {
