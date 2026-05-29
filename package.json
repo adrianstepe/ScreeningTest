@@ -1,0 +1,33 @@
+{
+  "name": "stepe-screening-test",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx tests/scoring.test.ts && tsx tests/workflow.test.ts",
+    "db:migrate": "tsx scripts/migrate.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.828.0",
+    "next": "^15.3.3",
+    "next-auth": "^4.24.11",
+    "pg": "^8.16.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "zod": "^3.25.36"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.24",
+    "@types/pg": "^8.15.2",
+    "@types/react": "^19.1.6",
+    "@types/react-dom": "^19.1.5",
+    "eslint": "^9.27.0",
+    "eslint-config-next": "^15.3.3",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}
