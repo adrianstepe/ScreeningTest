@@ -29,9 +29,44 @@ function timestamp(audio: HTMLAudioElement | null) {
   return `[${hh}:${mm}:${ss}] `;
 }
 
+function SpeedControl({
+  id,
+  label,
+  value,
+  audio,
+  onChange
+}: {
+  id: string;
+  label: string;
+  value: number;
+  audio: HTMLAudioElement | null;
+  onChange: (value: number) => void;
+}) {
+  function updateSpeed(nextValue: number) {
+    onChange(nextValue);
+    if (audio) audio.playbackRate = nextValue;
+  }
+
+  return (
+    <div className="speed-control">
+      <div className="speed-header">
+        <label htmlFor={id}>{label}</label>
+        <output htmlFor={id}>{value.toFixed(2).replace(/\.?0+$/, "")}x</output>
+      </div>
+      <div className="speed-slider">
+        <span>0.25x</span>
+        <input id={id} type="range" min="0.25" max="2" step="0.05" value={value} onChange={(event) => updateSpeed(Number(event.target.value))} />
+        <span>2x</span>
+      </div>
+    </div>
+  );
+}
+
 export function TestForm({ token, name, partADraft, partBDraft }: Props) {
   const [partA, setPartA] = useState(partADraft || "");
   const [partB, setPartB] = useState(partBDraft || "");
+  const [partASpeed, setPartASpeed] = useState(1);
+  const [partBSpeed, setPartBSpeed] = useState(1);
   const [dirty, setDirty] = useState(false);
   const [confirmedInstructions, setConfirmedInstructions] = useState(false);
   const [savedAt, setSavedAt] = useState<string>();
@@ -131,7 +166,18 @@ export function TestForm({ token, name, partADraft, partBDraft }: Props) {
 
       <section className="panel stack">
         <h2>Part A</h2>
-        <audio ref={audioARef} controls preload="metadata" src={`/audio/${token}/a`} />
+        <div className="audio-tools">
+          <audio
+            ref={audioARef}
+            controls
+            preload="metadata"
+            src={`/audio/${token}/a`}
+            onLoadedMetadata={() => {
+              if (audioARef.current) audioARef.current.playbackRate = partASpeed;
+            }}
+          />
+          <SpeedControl id="part-a-speed" label="Part A speed" value={partASpeed} audio={audioARef.current} onChange={setPartASpeed} />
+        </div>
         <div className="helperbar">
           <button type="button" className="button" onClick={() => helper("[inaudible] ", "a")}>
             [inaudible]
@@ -157,7 +203,18 @@ export function TestForm({ token, name, partADraft, partBDraft }: Props) {
 
       <section className="panel stack">
         <h2>Part B</h2>
-        <audio ref={audioBRef} controls preload="metadata" src={`/audio/${token}/b`} />
+        <div className="audio-tools">
+          <audio
+            ref={audioBRef}
+            controls
+            preload="metadata"
+            src={`/audio/${token}/b`}
+            onLoadedMetadata={() => {
+              if (audioBRef.current) audioBRef.current.playbackRate = partBSpeed;
+            }}
+          />
+          <SpeedControl id="part-b-speed" label="Part B speed" value={partBSpeed} audio={audioBRef.current} onChange={setPartBSpeed} />
+        </div>
         <div className="helperbar">
           {["[S1]: ", "[S2]: ", "[S3]: ", "[inaudible] ", "[unclear: ?] ", "[overlap] ", "[/overlap] "].map((item) => (
             <button key={item} type="button" className="button" onClick={() => helper(item, "b")}>

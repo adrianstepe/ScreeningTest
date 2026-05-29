@@ -10,10 +10,19 @@ const databaseUrl = process.env.DATABASE_URL;
 const usePostgres = Boolean(databaseUrl && /^postgres(ql)?:\/\//i.test(databaseUrl));
 
 let pool: Pool | undefined;
+let candidateSchemaReady: Promise<void> | undefined;
 
 function pg() {
   if (!pool) pool = new Pool({ connectionString: databaseUrl });
   return pool;
+}
+
+async function ensureCandidateSchema() {
+  candidateSchemaReady ??= pg().query(`
+    alter table candidates add column if not exists part_a_whisper_draft text;
+    alter table candidates add column if not exists part_b_whisper_draft text;
+  `).then(() => undefined);
+  return candidateSchemaReady;
 }
 
 async function readJson(): Promise<AppDatabase> {
@@ -106,6 +115,7 @@ export async function getCandidateSubmissionStateByToken(token: string) {
 
 export async function saveCandidate(candidate: Candidate) {
   if (usePostgres) {
+    await ensureCandidateSchema();
     await pg().query(
       `insert into candidates (
         id, token, name, email, status, deadline_at, created_at, opened_at, submitted_at, reviewed_at,
