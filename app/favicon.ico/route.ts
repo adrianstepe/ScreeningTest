@@ -8,7 +8,7 @@ export async function GET() {
 
   return new Response(icon, {
     headers: {
-      "Cache-Control": "public, max-age=31536000, immutable",
+      "Cache-Control": "public, max-age=0, must-revalidate",
       "Content-Type": "image/png"
     }
   });

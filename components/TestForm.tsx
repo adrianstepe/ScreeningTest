@@ -91,7 +91,6 @@ export function TestForm({ token, name, partADraft, partBDraft }: Props) {
   const [partA, setPartA] = useState(partADraft || "");
   const [partB, setPartB] = useState(partBDraft || "");
   const [dirty, setDirty] = useState(false);
-  const [confirmedInstructions, setConfirmedInstructions] = useState(false);
   const [savedAt, setSavedAt] = useState<string>();
   const [isPending, startTransition] = useTransition();
   const partARef = useRef<HTMLTextAreaElement>(null);
@@ -145,7 +144,7 @@ export function TestForm({ token, name, partADraft, partBDraft }: Props) {
             <div>
               <h2>General rules</h2>
               <ul>
-                <li>The visible transcript is a Whisper draft, not the correct answer.</li>
+                <li>The visible transcript is a draft transcript, not the correct answer.</li>
                 <li>Listen to the audio and correct the draft as accurately as possible.</li>
                 <li>Write what is actually said, not what the speaker probably meant. Do not paraphrase or shorten the text.</li>
                 <li>Keep full Latvian diacritics: ā, č, ē, ģ, ī, ķ, ļ, ņ, š, ū, ž.</li>
@@ -238,22 +237,9 @@ export function TestForm({ token, name, partADraft, partBDraft }: Props) {
         />
       </section>
 
-      <section className="panel stack">
-        <label className="checkbox-label">
-          <input
-            type="checkbox"
-            name="instructionConfirmation"
-            checked={confirmedInstructions}
-            onChange={(event) => setConfirmedInstructions(event.target.checked)}
-            required
-          />
-          <span>I confirm that I listened to the audio and corrected the Whisper draft according to the instructions.</span>
-        </label>
-      </section>
-
       <div className="spread">
         <span className="muted small">{savedAt ? `Draft saved ${savedAt}` : "Draft saves automatically while you type."}</span>
-        <button className="button primary" type="submit" disabled={isPending || !partA.trim() || !partB.trim() || !confirmedInstructions}>
+        <button className="button primary" type="submit" disabled={isPending || !partA.trim() || !partB.trim()}>
           {isPending ? "Submitting..." : "Submit test"}
         </button>
       </div>
